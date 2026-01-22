@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from backend.maestro import maestro_app
+
 app = FastAPI()
 
 # CONFIGURAÇÃO DE CORS: Permite que o Next.js (porta 3000) acesse o FastAPI
@@ -19,12 +19,12 @@ class ChatMessage(BaseModel):
 
 @app.post("/chat")
 async def chat_endpoint(data: ChatMessage):
-    # Invoca o LangGraph
-    inputs = {"messages": [data.message]}
-    result = maestro_app.invoke(inputs)
+    user_input = data.message
     
-    # Pega a última mensagem gerada pelo grafo
-    bot_reply = result["messages"][-1]
+    # FUTURO: Aqui você chamará o seu LangGraph Maestro
+    # response = maestro_graph.invoke({"messages": [("user", user_input)]})
+    
+    bot_reply = f"Maestro recebeu: '{user_input}'. O LangGraph será integrado aqui!"
     
     return {"reply": bot_reply}
 
