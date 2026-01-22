@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import ollama
 
 app = FastAPI()
 
@@ -21,10 +22,20 @@ class ChatMessage(BaseModel):
 async def chat_endpoint(data: ChatMessage):
     user_input = data.message
     
-    # FUTURO: Aqui você chamará o seu LangGraph Maestro
-    # response = maestro_graph.invoke({"messages": [("user", user_input)]})
+    # Chamada ao Ollama (usando o modelo llama3 ou o que você tiver no 'ollama list')
+    # O 'system' prompt garante as respostas curtas que você pediu
+    response = ollama.chat(model='llama3', messages=[
+        {
+            'role': 'system',
+            'content': 'Responda sempre de forma muito curta, direta e objetiva.',
+        },
+        {
+            'role': 'user',
+            'content': user_input,
+        },
+    ])
     
-    bot_reply = f"Maestro recebeu: '{user_input}'. O LangGraph será integrado aqui!"
+    bot_reply = response['message']['content']
     
     return {"reply": bot_reply}
 

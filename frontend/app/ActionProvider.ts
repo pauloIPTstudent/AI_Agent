@@ -10,7 +10,7 @@ class ActionProvider {
   handleUserMessage = async (message: string) => {
     try {
       // Chamada para o backend
-      const response = await fetch("http://localhost:8000/chat", {
+      const response = await fetch("https://echoic-intransitive-berta.ngrok-free.dev/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
