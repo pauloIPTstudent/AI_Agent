@@ -22,9 +22,9 @@ class ChatMessage(BaseModel):
 async def chat_endpoint(data: ChatMessage):
     user_input = data.message
     
-    # Chamada ao Ollama (usando o modelo llama3 ou o que você tiver no 'ollama list')
+    # Chamada ao Ollama (usando o modelo phi3 ou o que você tiver no 'ollama list')
     # O 'system' prompt garante as respostas curtas que você pediu
-    response = ollama.chat(model='llama3', messages=[
+    response = ollama.chat(model='phi3', messages=[
         {
             'role': 'system',
             'content': 'Responda sempre de forma muito curta, direta e objetiva.',
