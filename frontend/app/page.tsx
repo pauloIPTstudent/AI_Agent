@@ -2,15 +2,16 @@
 import dynamic from 'next/dynamic'
 import Dashboard from '@/components/DashBoard'
 import 'react-chatbot-kit/build/main.css'
+import config from './config';
+import MessageParser from './MessageParser';
+import ActionProvider from './ActionProvider';
 
 const ChatbotSSRFree = dynamic(
   () => import('react-chatbot-kit').then((mod) => mod.default),
   { ssr: false }
 )
 
-import config from './config';
-import MessageParser from './MessageParser';
-import ActionProvider from './ActionProvider';
+
 
 export default function MainPage() {
   return (
