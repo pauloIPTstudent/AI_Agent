@@ -94,3 +94,35 @@ def get_all_interactions():
         raise
     finally:
         session.close()
+
+
+def get_interaction_by_id(interaction_id: int):
+    """
+    Recupera uma interação específica pelo ID da mensagem original.
+    Retorna um dicionário com os dados relacionados ou None se não encontrado.
+    """
+    session = SessionLocal()
+    try:
+        user_msg = session.query(UserMessage).filter(UserMessage.id == interaction_id).first()
+        if not user_msg or not user_msg.refined_version or not user_msg.refined_version.final_response:
+            return None
+        
+        refined_msg = user_msg.refined_version
+        final_res = refined_msg.final_response
+        
+        return {
+            "id": user_msg.id,
+            "original_text": user_msg.content,
+            "original_timestamp": user_msg.timestamp,
+            "refined_text": refined_msg.content,
+            "refined_timestamp": refined_msg.timestamp,
+            "refined_model": refined_msg.model_name,
+            "final_text": final_res.content,
+            "final_timestamp": final_res.timestamp,
+            "final_model": final_res.model_name,
+        }
+    except Exception as e:
+        print(f"Erro ao recuperar interação por ID: {e}")
+        raise
+    finally:
+        session.close()

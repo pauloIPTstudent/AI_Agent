@@ -26,7 +26,7 @@ class RefinedMessage(Base):
     content: Mapped[str] = mapped_column(nullable=False)
     model_name: Mapped[Optional[str]] = mapped_column(nullable=True)
     timestamp: Mapped[datetime] = mapped_column(server_default=func.now())
-
+    
     # Relacionamentos
     original_message: Mapped["UserMessage"] = relationship(back_populates="refined_version")
     final_response: Mapped["FinalResponse"] = relationship(

@@ -4,8 +4,10 @@ from pydantic import BaseModel
 from typing import TypedDict, List
 import ollama
 import uvicorn
-from database.database import engine, SessionLocal, init_db, log_interaction
+from database.database import engine, SessionLocal, init_db, log_interaction, get_all_interactions, get_interaction_by_id
 from database.models import UserMessage, RefinedMessage, FinalResponse
+import datetime
+from datetime import datetime
 
 # 1. DEFINIÇÃO DO ESTADO DO AGENTE (Para o LangGraph)
 class AgentState(TypedDict):
@@ -84,13 +86,34 @@ async def run_maestro_flow(message: str):
     state.update(optimized)
     result = response_generator(state)
 
-    
+    try:
+        # Log da interação no banco de dados
+        log_interaction(
+            original_text=message,
+            refined_text=optimized["refined_prompt"],
+            final_text=result["final_response"],
+            refiner_model="phi3",
+            responder_model="phi3"
+        )
+    except Exception as e:
+        print(f"Erro ao logar interação: {e}")
     
     return result["final_response"]
 
 # 5. ENDPOINT DA API
 class ChatMessage(BaseModel):
     message: str
+
+class InteractionResponse(BaseModel):
+    id: int
+    original_text: str
+    original_timestamp: datetime
+    refined_text: str
+    refined_timestamp: datetime
+    refined_model: str
+    final_text: str
+    final_timestamp: datetime
+    final_model: str
 
 @app.post("/chat")
 async def chat_endpoint(data: ChatMessage):
@@ -99,7 +122,21 @@ async def chat_endpoint(data: ChatMessage):
         return {"reply": reply}
     except Exception as e:
         print(f"Erro no fluxo Maestro: {e}")
+
         return {"reply": "Desculpe, tive um problema ao processar sua solicitação no servidor remoto."}
+    
+
+@app.get("/interactions_all", response_model=List[InteractionResponse])
+async def get_messages():
+    return get_all_interactions()
+
+@app.get("/interaction_by_id/{interaction_id}", response_model=InteractionResponse)
+async def get_endpoint_interaction_by_id(interaction_id: int):
+    interaction = get_interaction_by_id(interaction_id)
+    if not interaction:
+        raise HTTPException(status_code=404, detail="Interacao não encontrada")
+    return interaction
+
 
 if __name__ == "__main__":
     # 1. Inicializa o banco de dados (Cria tabelas se não existirem)
